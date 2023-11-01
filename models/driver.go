@@ -48,9 +48,7 @@ func New(dir string, options *Options)(*Driver, error){
 		opts.Logger.Debug("Using '%s' (database already exists)\n", dir)
 		return &driver,nil
 	}
-
 	opts.Logger.Debug("Creating the database at '%s' ...\n",dir)
-	
 	return &driver, os.MkdirAll(
 		dir,
 		0755)
@@ -173,7 +171,7 @@ func (driver *Driver) Delete(collection string, data string) error {
 }
 
 //Update any record from a given collection
-//Currently we have to enten the entire User struct, UPDATE IT SO THAT WE CAN UPDATE ONLY THE REQUIRED FIELDS
+//Currently we have to enter the entire User struct, UPDATE IT SO THAT WE CAN UPDATE ONLY THE REQUIRED FIELDS(Or Maybe make a new method for that?)
 func (driver *Driver) UpdateRecord(collection string, data string, v interface{}) error {
 	if collection == ""{
 		return fmt.Errorf("missing collection - Unable To Update")

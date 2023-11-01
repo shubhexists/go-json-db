@@ -3,13 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	//REMOVE Dot Import after thini=king of an appropriate name for the models package (Discouraged in GOlang)
 	. "github.com/shubhexists/go-json-db/models" 
 )
 //EVERY THING HERE SHOULD BE IN MODELS FOR THE USER TO CREATE THESE DYNAMICALLY, THESE ARE JUST THE EXAMPLES.
 //ALSO THINK OF A BASIC WAY TO ALLOW USERS TO CREATE THESE STRUCTS DYNAMICALLY
 //THIS MAY BE ADDED INTO THE EXAMPLES FOLDER (CREATE LATER MAYBE)
-
-
 type User struct{
 	Name string
 	Age json.Number
@@ -26,13 +25,15 @@ type Address struct{
 }
 
 func main(){
-	dir := "./"
+	//All the collections would be in the /database directory
+	dir := "./database"
 	db, err := New(dir, nil)
 	if err != nil{
 		fmt.Println(err)
 		return 
 	}
-
+	//Sample Lists 
+	//We would have a test directory for testing and CI/CD Later..
 	employees := []User{
 		{"John4","23","9585394030","Humanize",Address{
 			"Delhi",
@@ -59,9 +60,10 @@ func main(){
 			"110092",
 		}},
 	}
-	// Move all the databases in a seperate folder to make it more clean, else multiple collections will create multiple folders polluting the code
+
+	//Writing into the database Example
 	for _,items := range employees {
-		db.Write("users", items.Name, User{
+		db.Write("trials", items.Name, User{
 			Name: items.Name,
 			Age: items.Age,
 			Contact: items.Contact,
@@ -70,12 +72,14 @@ func main(){
 		})
 	}
 
-	// records, err := db.ReadAll("users");
-	// if err != nil {
-	// 	fmt.Println("Error", err)
-	// }
-	// fmt.Println(records)
+	//Read All Data in a Collection
+	records, err := db.ReadAll("users");
+	if err != nil {
+		fmt.Println("Error", err)
+	}
+	fmt.Println(records)
 
+	//Update Complete Record Example
 	db.UpdateRecord("users", "John4", User{
 		Name: "Shubham",
 		Age: "18",
@@ -89,12 +93,7 @@ func main(){
 		},
 	})
 
-	// records1, err1 := db.ReadAll("users");
-	// if err1 != nil {
-	// 	fmt.Println("Error", err1)
-	// }
-	// fmt.Println(records1)
-
+	//Read a specific record from file name
 	record2, err := db.Read("users", "John10", &User{})
 	if err != nil{
 		fmt.Println("Error", err)
