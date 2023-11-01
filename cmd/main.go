@@ -61,7 +61,7 @@ func main(){
 	}
 	// Move all the databases in a seperate folder to make it more clean, else multiple collections will create multiple folders polluting the code
 	for _,items := range employees {
-		db.Write("trial", items.Name, User{
+		db.Write("users", items.Name, User{
 			Name: items.Name,
 			Age: items.Age,
 			Contact: items.Contact,
@@ -70,9 +70,34 @@ func main(){
 		})
 	}
 
-	records, err := db.ReadAll("users");
-	if err != nil {
+	// records, err := db.ReadAll("users");
+	// if err != nil {
+	// 	fmt.Println("Error", err)
+	// }
+	// fmt.Println(records)
+
+	db.UpdateRecord("users", "John4", User{
+		Name: "Shubham",
+		Age: "18",
+		Contact: "9585394030",
+		Company: "Humanize",
+		Address: Address{
+			City: "Delhi",
+			State: "Delhi",
+			Country: "India",
+			Pincode: "110092",
+		},
+	})
+
+	// records1, err1 := db.ReadAll("users");
+	// if err1 != nil {
+	// 	fmt.Println("Error", err1)
+	// }
+	// fmt.Println(records1)
+
+	record2, err := db.Read("users", "John10", &User{})
+	if err != nil{
 		fmt.Println("Error", err)
 	}
-	fmt.Println(records)
+	fmt.Println(record2)
 }

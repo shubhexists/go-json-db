@@ -26,6 +26,7 @@ type (
 
 //CREATE A NEW DATABASE (COLLECTION)
 func New(dir string, options *Options)(*Driver, error){
+	//This checks for any incorrect filename and corrects it.
 	dir = filepath.Clean(dir)
 	opts := Options{}
 	if options != nil {
@@ -105,29 +106,30 @@ func (driver *Driver) Write(collection string, data string, v interface{}) error
 }
 
 //READ ANY RECORD FROM A GIVEN COLLECTION
-func (driver *Driver) Read(collection string, data string, v interface{}) error {
+func (driver *Driver) Read(collection string, data string, v interface{})(string , error){
 	if collection == ""{
-		return fmt.Errorf("missing collection - Unable To Read")
+		return "",fmt.Errorf("missing collection - Unable To Read")
 	}
 	
 	if data == "" {
-		return fmt.Errorf("missing data - Unable To Read")
+		return "",fmt.Errorf("missing data - Unable To Read")
 	}
 
 	record := filepath.Join(driver.dir, collection, data)
 	if _,err := utils.Stat(record);
 	err != nil{
-		return err
+		return "",err
 	}
 
 	b, err := ioutil.ReadFile(record+".json")
 	if err != nil {
-		return err
+		return "",err
 	}
-	return json.Unmarshal(b,&v)
+	return string(b),nil
 }
 
 //READ ALL RECORDS FROM A GIVEN COLLECTION
+//THIS WILL RETURN JSON ARRAY OF ALL THE RECORDS
 func (driver *Driver) ReadAll(collection string)([]string, error){
 	if collection == ""{
 		return nil, fmt.Errorf("missing collection - Unable to Read Record")
@@ -166,6 +168,36 @@ func (driver *Driver) Delete(collection string, data string) error {
 		return os.RemoveAll(dir)
 	case fi.Mode().IsRegular():
 		return os.RemoveAll(dir+".json")
+	}
+	return nil
+}
+
+//Update any record from a given collection
+//Currently we have to enten the entire User struct, UPDATE IT SO THAT WE CAN UPDATE ONLY THE REQUIRED FIELDS
+func (driver *Driver) UpdateRecord(collection string, data string, v interface{}) error {
+	if collection == ""{
+		return fmt.Errorf("missing collection - Unable To Update")
+	}
+	
+	if data == "" {
+		return fmt.Errorf("missing data - Unable To Update")
+	}
+
+	record := filepath.Join(driver.dir, collection, data)
+	if _,err := utils.Stat(record);
+	err != nil{
+		return err
+	}
+
+	b, err := json.MarshalIndent(v, "", "\t")
+	if err != nil {
+		return err
+	}
+
+	b = append(b, byte('\n'))
+	if err := ioutil.WriteFile(record+".json", b , 0644);
+	err != nil {
+		return err
 	}
 	return nil
 }
