@@ -2,7 +2,8 @@ package models
 
 import (
 	"sync"
-	"io/ioutil" // io/util is deprecated but I found no alternative on ChatGPT :), To be updated soon with newer one
+	// io/util is deprecated but I found no alternative on ChatGPT :), To be updated soon with newer one
+	"io/ioutil" 
 	"encoding/json"
 	"fmt"
 	"path/filepath"
@@ -13,16 +14,17 @@ import (
 
 type (
 	Driver struct {
-		mutex   sync.Mutex // db operations should be non synchronous 
+		// db operations should be non synchronous 
 		// Got a reference from this - https://youtu.be/jkRN9zcLH1s?si=s5ec23U3tS5bi6EO
+		mutex   sync.Mutex
+		// this map will be used to store mutexes for each collection
 		mutexes map[string]*sync.Mutex
 		dir     string
 		log     Logger
 	}
 )
 
-
-
+//CREATE A NEW DATABASE (COLLECTION)
 func New(dir string, options *Options)(*Driver, error){
 	dir = filepath.Clean(dir)
 	opts := Options{}
@@ -47,13 +49,14 @@ func New(dir string, options *Options)(*Driver, error){
 	}
 
 	opts.Logger.Debug("Creating the database at '%s' ...\n",dir)
+	
 	return &driver, os.MkdirAll(
 		dir,
 		0755)
 }
 
+//MANAGE MUTEXES FOR EACH COLLECTION
 func (driver *Driver) ManageMutex(collection string) *sync.Mutex {
-
 	driver.mutex.Lock()
 	defer driver.mutex.Unlock()
 	m, ok := driver.mutexes[collection]
@@ -64,6 +67,7 @@ func (driver *Driver) ManageMutex(collection string) *sync.Mutex {
 	return m
 }
 
+//WRITE ANY RECORD TO A GIVEN COLLECTION
 func (driver *Driver) Write(collection string, data string, v interface{}) error {
 	if collection == "" {
 		return fmt.Errorf("missing collection - no place to save record")
@@ -100,6 +104,7 @@ func (driver *Driver) Write(collection string, data string, v interface{}) error
 	return os.Rename(tmpPath, fnlPath)
 }
 
+//READ ANY RECORD FROM A GIVEN COLLECTION
 func (driver *Driver) Read(collection string, data string, v interface{}) error {
 	if collection == ""{
 		return fmt.Errorf("missing collection - Unable To Read")
@@ -122,7 +127,7 @@ func (driver *Driver) Read(collection string, data string, v interface{}) error 
 	return json.Unmarshal(b,&v)
 }
 
-
+//READ ALL RECORDS FROM A GIVEN COLLECTION
 func (driver *Driver) ReadAll(collection string)([]string, error){
 	if collection == ""{
 		return nil, fmt.Errorf("missing collection - Unable to Read Record")
@@ -146,6 +151,7 @@ func (driver *Driver) ReadAll(collection string)([]string, error){
 	return records,nil
 }
 
+//DELETE ANY RECORD FROM A GIVEN COLLECTION
 func (driver *Driver) Delete(collection string, data string) error {
 	path := filepath.Join(collection,data)
 	mutex := driver.ManageMutex(collection)

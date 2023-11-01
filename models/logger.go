@@ -11,8 +11,6 @@ type(
 		Trace(string,...interface{})
 	}
 )
-
-
 type Options struct{
 	Logger
 }
