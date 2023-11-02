@@ -3,13 +3,15 @@ package models
 import (
 	"sync"
 	// io/util is deprecated but I found no alternative on ChatGPT :), To be updated soon with newer one
-	"io/ioutil" 
+	"io/ioutil"
+	//Maybe later on shift to a faster library for json encoding and decoding
 	"encoding/json"
 	"fmt"
-	"path/filepath"
 	"os"
-	"github.com/shubhexists/go-json-db/utils"
+	"path/filepath"
+
 	"github.com/jcelliott/lumber"
+	"github.com/shubhexists/go-json-db/utils"
 )
 
 type (
@@ -32,6 +34,7 @@ Current operations supported are -
 4) Delete
 5) Delete Collection
 6) Update Record
+7) Update
 */
 
 //CREATE A NEW DATABASE (COLLECTION)
@@ -216,7 +219,7 @@ func (driver *Driver) UpdateRecord(collection string, data string, v interface{}
 	err != nil{
 		return err
 	}
-
+	// "\t" is for indentation
 	b, err := json.MarshalIndent(v, "", "\t")
 	if err != nil {
 		return err
@@ -231,12 +234,39 @@ func (driver *Driver) UpdateRecord(collection string, data string, v interface{}
 }
 
 //Update with only the required fields, TO COMPLETE
-func (driver *Driver) Update(collection string, data string) error {
+func (driver *Driver) Update(collection string, data string,v interface{}, newValues map[string]interface{}) error {
 	if collection == ""{
 		return fmt.Errorf("missing collection - Unable To Update")
 	}
 	if data == ""{
 		return fmt.Errorf("missing record - Unable To Update")
 	}
+	record := filepath.Join(driver.dir, collection, data)
+	if _,err := utils.Stat(record);
+	err != nil{
+		return err
+	}
+	// // Unmarshal the json file into a map
+	b , err := ioutil.ReadFile(record+".json")
+	if err != nil{
+		return err
+	}
+	
+	err = json.Unmarshal(b, &v)
+	if err != nil{
+		return err
+	}
+
+	// // Marshal the map back into json
+	// b, err = json.MarshalIndent(v, "", "\t")
+	// if err != nil{
+	// 	return err
+	// }
+	
+	// err = ioutil.WriteFile(record+".json", b, 0644)
+	// if err != nil{
+	// 	return err
+	// }
+
 	return nil
 }
