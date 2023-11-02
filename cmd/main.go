@@ -10,18 +10,19 @@ import (
 //ALSO THINK OF A BASIC WAY TO ALLOW USERS TO CREATE THESE STRUCTS DYNAMICALLY
 //THIS MAY BE ADDED INTO THE EXAMPLES FOLDER (CREATE LATER MAYBE)
 type User struct{
-	Name string
-	Age json.Number
-	Contact string
-	Company string
-	Address Address
+	//@todo Add implementation for custom tags
+	Name string       `json:"name" db:"main"` //Change this custom tag name maybe?
+	Age json.Number   `json:"age"`
+	Contact string    `json:"contact"`
+	Company string    `json:"company"`
+	Address Address   `json:"address"`
 }
 
 type Address struct{
-	City string
-	State string
-	Country string
-	Pincode json.Number
+	City string		     `json:"city"`
+	State string         `json:"state"`
+	Country string       `json:"country"`
+	Pincode json.Number  `json:"pincode"`
 }
 
 func main(){
@@ -63,7 +64,7 @@ func main(){
 
 	//Writing into the database Example
 	for _,items := range employees {
-		db.Write("trials", items.Name, User{
+		db.Write("users", items.Name, User{
 			Name: items.Name,
 			Age: items.Age,
 			Contact: items.Contact,
@@ -94,9 +95,15 @@ func main(){
 	})
 
 	//Read a specific record from file name
-	record2, err := db.Read("users", "John10", &User{})
+	record2, err := db.Read("users", "John10")
 	if err != nil{
 		fmt.Println("Error", err)
 	}
 	fmt.Println(record2)
+
+	//Delete any particular record from collection
+	err4 := db.Delete("users","John10")
+	if err != nil{
+		fmt.Println("Error", err4)
+	}
 }

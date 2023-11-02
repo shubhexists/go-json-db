@@ -24,6 +24,16 @@ type (
 	}
 )
 
+/*
+Current operations supported are -
+1) Write
+2) Read
+3) ReadAll
+4) Delete
+5) Delete Collection
+6) Update Record
+*/
+
 //CREATE A NEW DATABASE (COLLECTION)
 func New(dir string, options *Options)(*Driver, error){
 	//This checks for any incorrect filename and corrects it.
@@ -104,7 +114,7 @@ func (driver *Driver) Write(collection string, data string, v interface{}) error
 }
 
 //READ ANY RECORD FROM A GIVEN COLLECTION
-func (driver *Driver) Read(collection string, data string, v interface{})(string , error){
+func (driver *Driver) Read(collection string, data string)(string , error){
 	if collection == ""{
 		return "",fmt.Errorf("missing collection - Unable To Read")
 	}
@@ -153,6 +163,10 @@ func (driver *Driver) ReadAll(collection string)([]string, error){
 
 //DELETE ANY RECORD FROM A GIVEN COLLECTION
 func (driver *Driver) Delete(collection string, data string) error {
+	if data == ""{
+		return fmt.Errorf("please enter a valid record")
+	}
+
 	path := filepath.Join(collection,data)
 	mutex := driver.ManageMutex(collection)
 	mutex.Lock()
@@ -168,6 +182,22 @@ func (driver *Driver) Delete(collection string, data string) error {
 		return os.RemoveAll(dir+".json")
 	}
 	return nil
+}
+
+//Delete any collection (All records in that collection)
+func (driver *Driver) DeleteCollection(collection string) error {
+	path := filepath.Join(collection)
+	mutex := driver.ManageMutex(collection)
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	dir := filepath.Join(driver.dir,path)
+	switch fi, err := utils.Stat(dir);{
+	case fi==nil,err!=nil:
+		return fmt.Errorf("not a valid collection. Kindly enter a valid collection Name")
+	default:
+		return os.RemoveAll(dir)
+	}
 }
 
 //Update any record from a given collection
@@ -196,6 +226,17 @@ func (driver *Driver) UpdateRecord(collection string, data string, v interface{}
 	if err := ioutil.WriteFile(record+".json", b , 0644);
 	err != nil {
 		return err
+	}
+	return nil
+}
+
+//Update with only the required fields, TO COMPLETE
+func (driver *Driver) Update(collection string, data string) error {
+	if collection == ""{
+		return fmt.Errorf("missing collection - Unable To Update")
+	}
+	if data == ""{
+		return fmt.Errorf("missing record - Unable To Update")
 	}
 	return nil
 }
