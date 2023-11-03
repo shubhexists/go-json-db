@@ -64,7 +64,7 @@ func main(){
 
 	//Writing into the database Example
 	for _,items := range employees {
-		db.Write("users", items.Name, User{
+		db.Write("users", User{
 			Name: items.Name,
 			Age: items.Age,
 			Contact: items.Contact,
@@ -107,7 +107,8 @@ func main(){
 		fmt.Println("Error", err4)
 	}
 	
-	err5 := db.Search("users","John20","company")
+	//Example for Search
+	err5 := db.Search("users","John20","address")
 	if err5 != nil{
 		fmt.Println("Error", err5)
 	}

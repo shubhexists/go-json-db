@@ -33,6 +33,7 @@ Current operations supported are -
 4) Delete
 5) Delete Collection
 6) Update Record
+7) Search
 */
 
 // CREATE A NEW DATABASE (COLLECTION)
@@ -77,12 +78,14 @@ func (driver *Driver) ManageMutex(collection string) *sync.Mutex {
 }
 
 // WRITE ANY RECORD TO A GIVEN COLLECTION
-func (driver *Driver) Write(collection string, data string, v interface{}) error {
+func (driver *Driver) Write(collection string, v interface{}) error {
 	if collection == "" {
 		return fmt.Errorf("missing collection - no place to save record")
 	}
 
+	data := utils.CheckTag(v)
 	if data == "" {
+		//Change this Error Message
 		return fmt.Errorf("missing data - Unable to save record (No Name)")
 	}
 
@@ -199,6 +202,7 @@ func (driver *Driver) DeleteCollection(collection string) error {
 
 // Update any record from a given collection
 // Currently we have to enter the entire User struct, UPDATE IT SO THAT WE CAN UPDATE ONLY THE REQUIRED FIELDS(Or Maybe make a new method for that?)
+// MUTEX LOCKS TO BE ADDED
 func (driver *Driver) UpdateRecord(collection string, data string, v interface{}) error {
 	if collection == "" {
 		return fmt.Errorf("missing collection - Unable To Update")
@@ -212,7 +216,7 @@ func (driver *Driver) UpdateRecord(collection string, data string, v interface{}
 	if _, err := utils.Stat(record); err != nil {
 		return err
 	}
-	// "\t" is for indentation
+	// "\t" is for indentation (Tab KEy)
 	b, err := json.MarshalIndent(v, "", "\t")
 	if err != nil {
 		return err
@@ -225,8 +229,9 @@ func (driver *Driver) UpdateRecord(collection string, data string, v interface{}
 	return nil
 }
 
-//TO CHECK IF IT WORKS IN NESTED STRUCTS(JSON)
+// TO CHECK IF IT WORKS IN NESTED STRUCTS(JSON) - Add to experimental maybe?
 // ALSO THIS VALUE IS JUST PRINTED NOT RETURNED ( TO FIX)
+// ADD Search by other values also and not by custom value only
 func (driver *Driver) Search(collection string, data string, key string) error {
 	if collection == "" {
 		return fmt.Errorf("missing collection, Unable to Search")
@@ -245,7 +250,7 @@ func (driver *Driver) Search(collection string, data string, key string) error {
 		return err
 	}
 
-	var t map[string]interface{} // You can use a suitable struct type if you know the structure
+	var t map[string]interface{}
 	if err := json.Unmarshal(b, &t); err != nil {
 		fmt.Println("Error parsing JSON:", err)
 		return err
