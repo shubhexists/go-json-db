@@ -106,17 +106,8 @@ func main(){
 	if err4 != nil{
 		fmt.Println("Error", err4)
 	}
-
-	// Update a particular field in a record
-	updatedFields := map[string]interface{}{
-		"name": "Ragnar",
-		"age":  25,
-		"address": map[string]interface{}{
-			"city": "Rajasthan",
-		},
-	}
-	s := User{}
-	err5 := db.Update("users", "John20", s, updatedFields)
+	
+	err5 := db.Search("users","John20","company")
 	if err5 != nil{
 		fmt.Println("Error", err5)
 	}

@@ -24,9 +24,11 @@ func Stat(path string)(fi os.FileInfo, err error){
 func ExpandStruct(s interface{}) {
 	v := reflect.ValueOf(s)
 	t := v.Type()
+	fmt.Println(t)
 
 	if t.Kind() != reflect.Struct {
 		fmt.Println("Not a struct")
+		fmt.Println(t.Kind())
 		return
 	}
 
