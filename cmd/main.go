@@ -6,6 +6,7 @@ import (
 	//REMOVE Dot Import after thini=king of an appropriate name for the models package (Discouraged in GOlang)
 	. "github.com/shubhexists/go-json-db/models" 
 )
+
 //EVERY THING HERE SHOULD BE IN MODELS FOR THE USER TO CREATE THESE DYNAMICALLY, THESE ARE JUST THE EXAMPLES.
 //ALSO THINK OF A BASIC WAY TO ALLOW USERS TO CREATE THESE STRUCTS DYNAMICALLY
 //THIS MAY BE ADDED INTO THE EXAMPLES FOLDER (CREATE LATER MAYBE)
@@ -64,7 +65,7 @@ func main(){
 
 	//Writing into the database Example
 	for _,items := range employees {
-		db.Write("users", items.Name, User{
+		db.Write("users", User{
 			Name: items.Name,
 			Age: items.Age,
 			Contact: items.Contact,
@@ -103,7 +104,14 @@ func main(){
 
 	//Delete any particular record from collection
 	err4 := db.Delete("users","John10")
-	if err != nil{
+	if err4 != nil{
 		fmt.Println("Error", err4)
 	}
+	
+	//Experimental
+	// //Example for Search
+	// err5 := db.Search("users","John20","address")
+	// if err5 != nil{
+	// 	fmt.Println("Error", err5)
+	// }
 }
