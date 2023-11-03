@@ -32,8 +32,7 @@ Current operations supported are -
 3) ReadAll
 4) Delete
 5) Delete Collection
-6) Update Record
-7) Search
+6) Update Record 
 */
 
 // CREATE A NEW DATABASE (COLLECTION)
@@ -115,6 +114,7 @@ func (driver *Driver) Write(collection string, v interface{}) error {
 }
 
 // READ ANY RECORD FROM A GIVEN COLLECTION
+// Only From Primary Key
 func (driver *Driver) Read(collection string, data string) (string, error) {
 	if collection == "" {
 		return "", fmt.Errorf("missing collection - Unable To Read")
@@ -176,8 +176,7 @@ func (driver *Driver) Delete(collection string, data string) error {
 	case fi == nil, err != nil:
 		return fmt.Errorf("unable to find file or directory named %v", path)
 	case fi.Mode().IsDir():
-		//Is removing the directory the right thing to do here? Coz essentially the User isn't deleting the collection
-		return os.RemoveAll(dir)
+		return fmt.Errorf("this seems like a collection, kindly enter a record to delete or use db.DeleteCollection")
 	case fi.Mode().IsRegular():
 		return os.RemoveAll(dir + ".json")
 	}
@@ -203,6 +202,7 @@ func (driver *Driver) DeleteCollection(collection string) error {
 // Update any record from a given collection
 // Currently we have to enter the entire User struct, UPDATE IT SO THAT WE CAN UPDATE ONLY THE REQUIRED FIELDS(Or Maybe make a new method for that?)
 // MUTEX LOCKS TO BE ADDED
+// Only Primary Key 
 func (driver *Driver) UpdateRecord(collection string, data string, v interface{}) error {
 	if collection == "" {
 		return fmt.Errorf("missing collection - Unable To Update")
@@ -229,38 +229,3 @@ func (driver *Driver) UpdateRecord(collection string, data string, v interface{}
 	return nil
 }
 
-// TO CHECK IF IT WORKS IN NESTED STRUCTS(JSON) - Add to experimental maybe?
-// ALSO THIS VALUE IS JUST PRINTED NOT RETURNED ( TO FIX)
-// ADD Search by other values also and not by custom value only
-func (driver *Driver) Search(collection string, data string, key string) error {
-	if collection == "" {
-		return fmt.Errorf("missing collection, Unable to Search")
-	}
-	if data == "" {
-		return fmt.Errorf("missing Record, Unable to Search")
-	}
-	record := filepath.Join(driver.dir, collection, data)
-
-	if _, err := utils.Stat(record); err != nil {
-		return err
-	}
-
-	b, err := ioutil.ReadFile(record + ".json")
-	if err != nil {
-		return err
-	}
-
-	var t map[string]interface{}
-	if err := json.Unmarshal(b, &t); err != nil {
-		fmt.Println("Error parsing JSON:", err)
-		return err
-	}
-
-	value, exists := t[key]
-	if exists {
-		fmt.Printf("Value of '%s' field: %v\n", key, value)
-	} else {
-		fmt.Printf("Field '%s' not found in the JSON data.\n", key)
-	}
-	return nil
-}

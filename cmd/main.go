@@ -6,6 +6,7 @@ import (
 	//REMOVE Dot Import after thini=king of an appropriate name for the models package (Discouraged in GOlang)
 	. "github.com/shubhexists/go-json-db/models" 
 )
+
 //EVERY THING HERE SHOULD BE IN MODELS FOR THE USER TO CREATE THESE DYNAMICALLY, THESE ARE JUST THE EXAMPLES.
 //ALSO THINK OF A BASIC WAY TO ALLOW USERS TO CREATE THESE STRUCTS DYNAMICALLY
 //THIS MAY BE ADDED INTO THE EXAMPLES FOLDER (CREATE LATER MAYBE)
@@ -107,9 +108,10 @@ func main(){
 		fmt.Println("Error", err4)
 	}
 	
-	//Example for Search
-	err5 := db.Search("users","John20","address")
-	if err5 != nil{
-		fmt.Println("Error", err5)
-	}
+	//Experimental
+	// //Example for Search
+	// err5 := db.Search("users","John20","address")
+	// if err5 != nil{
+	// 	fmt.Println("Error", err5)
+	// }
 }

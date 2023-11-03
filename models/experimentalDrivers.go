@@ -57,3 +57,11 @@ func (driver *Driver) Update(collection string, data string,v interface{}, newVa
 
 	return nil
 }
+
+
+// TO CHECK IF IT WORKS IN NESTED STRUCTS(JSON) - Add to experimental maybe?
+// ALSO THIS VALUE IS JUST PRINTED NOT RETURNED ( TO FIX)
+// ADD Search by other values except primary key
+func (driver *Driver) Search(collection string, data string, key string) error {
+	return nil
+}
