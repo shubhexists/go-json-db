@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	//REMOVE Dot Import after thini=king of an appropriate name for the models package (Discouraged in GOlang)
+	//REMOVE Dot Import after thinking of an appropriate name for the models package (Discouraged in GOlang)
 	. "github.com/shubhexists/go-json-db/models" 
 )
 
@@ -13,7 +13,7 @@ import (
 type User struct{
 	//@todo Add implementation for custom tags
 	Name string       `json:"name" db:"main"` //Change this custom tag name maybe?
-	Age json.Number   `json:"age" db:"main"`
+	Age json.Number   `json:"age"`
 	Contact string    `json:"contact"`
 	Company string    `json:"company"`
 	Address Address   `json:"address"`
