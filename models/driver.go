@@ -199,8 +199,7 @@ func (driver *Driver) DeleteCollection(collection string) error {
 }
 
 // Update any record from a given collection
-// Currently we have to enter the entire User struct, UPDATE IT SO THAT WE CAN UPDATE ONLY THE REQUIRED FIELDS(Or Maybe make a new method for that?)
-// MUTEX LOCKS TO BE ADDED
+// Currently we have to enter the entire User struct, UPDATE IT SO THAT WE CAN UPDATE ONLY THE REQUIRED FIELDS(Or Maybe make a new method for that?) 
 // Only Primary Key 
 func (driver *Driver) UpdateRecord(collection string, data string, v interface{}) error {
 	if collection == "" {
@@ -210,6 +209,10 @@ func (driver *Driver) UpdateRecord(collection string, data string, v interface{}
 	if data == "" {
 		return fmt.Errorf("missing data - Unable To Update")
 	}
+	
+	mutex := driver.ManageMutex(collection)
+	mutex.Lock()
+	defer mutex.Unlock()
 
 	record := filepath.Join(driver.dir, collection, data)
 	if _, err := utils.Stat(record); err != nil {
