@@ -92,9 +92,16 @@ func (driver *Driver) Write(collection string, v interface{}) error {
 	defer mutex.Unlock()
 
 	dir := filepath.Join(driver.dir, collection)
-	fnlPath := filepath.Join(dir, data+".json")
+	tempdir := filepath.Join(dir, data)
+	fnlPath := filepath.Join(dir, data + ".json")
 	tmpPath := fnlPath + ".tmp"
 
+	// Check if the file already exists
+	if _, err := utils.Stat(tempdir); err == nil {
+		fmt.Println("Record already exists!")
+		return fmt.Errorf("record already exists")
+	}
+	
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return err
 	}
@@ -142,7 +149,7 @@ func (driver *Driver) ReadAll(collection string) ([]string, error) {
 		return nil, fmt.Errorf("missing collection - Unable to Read Record")
 	}
 	dir := filepath.Join(driver.dir, collection)
-	if _, err := utils.Stat(dir); err != nil {
+	if _, err := os.Stat(dir); err != nil {
 		return nil, err
 	}
 
