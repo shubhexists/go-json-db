@@ -82,10 +82,9 @@ func (driver *Driver) Write(collection string, v interface{}) error {
 		return fmt.Errorf("missing collection - no place to save record")
 	}
 
-	data := utils.CheckTag(v)
-	if data == "" {
-		//Change this Error Message
-		return fmt.Errorf("missing data - Unable to save record (No Name)")
+	data,err := utils.CheckTag(v)
+	if err != nil {
+		return err
 	}
 
 	mutex := driver.ManageMutex(collection)

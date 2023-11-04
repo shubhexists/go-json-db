@@ -16,16 +16,33 @@ func Stat(path string) (fi os.FileInfo, err error) {
 
 // Utility fucntion to check for tag "db" with value main in the struct and returning the struct member name
 // Also Check if it is Unique, If not Return an Error - TODO
-func CheckTag(s interface{}) string {
+func CheckTag(s interface{}) (string, error) {
 	v := reflect.ValueOf(s)
 	t := v.Type()
+
+	mainFieldFound := false
+	mainField := ""
+
 	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
-		if tagValue, ok := field.Tag.Lookup("db"); ok && tagValue == "main" {
-			return fmt.Sprintf("%v", v.Field(i).Interface())
-		}
+        field := t.Field(i)
+        if tagValue, ok := field.Tag.Lookup("db"); ok {
+            if tagValue == "main" {
+				if mainFieldFound {
+					fmt.Println("Error: Multiple main fields found")
+					return "", fmt.Errorf("multiple main fields found")
+				} else {
+					mainFieldFound = true
+					mainField = v.Field(i).Interface().(string)
+				}
+            }
+        }
+    }
+	if mainFieldFound {
+		return mainField, nil
+	} else {
+		fmt.Println("Error: No main field found")
+		return "", fmt.Errorf("no main field found")
 	}
-	return ""
 }
 
 // Utility function to check if datatype is Struct and if it is a struct, expand it

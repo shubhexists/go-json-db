@@ -13,7 +13,7 @@ import (
 type User struct{
 	//@todo Add implementation for custom tags
 	Name string       `json:"name" db:"main"` //Change this custom tag name maybe?
-	Age json.Number   `json:"age"`
+	Age json.Number   `json:"age" db:"main"`
 	Contact string    `json:"contact"`
 	Company string    `json:"company"`
 	Address Address   `json:"address"`
