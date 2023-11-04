@@ -13,7 +13,7 @@ import (
 type User struct{
 	//@todo Add implementation for custom tags
 	Name string       `json:"name" db:"main"` //Change this custom tag name maybe?
-	Age json.Number   `json:"age" db:"main"`
+	Age json.Number   `json:"age"`
 	Contact string    `json:"contact"`
 	Company string    `json:"company"`
 	Address Address   `json:"address"`
@@ -65,7 +65,7 @@ func main(){
 
 	//Writing into the database Example
 	for _,items := range employees {
-		db.Write("users", User{
+		db.Write("trials", User{
 			Name: items.Name,
 			Age: items.Age,
 			Contact: items.Contact,
@@ -75,7 +75,7 @@ func main(){
 	}
 
 	//Read All Data in a Collection
-	records, err := db.ReadAll("users");
+	records, err := db.ReadAll("trials");
 	if err != nil {
 		fmt.Println("Error", err)
 	}
@@ -96,7 +96,7 @@ func main(){
 	})
 
 	//Read a specific record from file name
-	record2, err := db.Read("users", "John10")
+	record2, err := db.Read("trials", "John10")
 	if err != nil{
 		fmt.Println("Error", err)
 	}
