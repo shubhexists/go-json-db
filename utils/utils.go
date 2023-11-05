@@ -15,7 +15,6 @@ func Stat(path string) (fi os.FileInfo, err error) {
 }
 
 // Utility fucntion to check for tag "db" with value main in the struct and returning the struct member name
-// Also Check if it is Unique, If not Return an Error - TODO
 func CheckTag(s interface{}) (string, error) {
 	v := reflect.ValueOf(s)
 	t := v.Type()
