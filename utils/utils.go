@@ -23,9 +23,9 @@ func CheckTag(s interface{}) (string, error) {
 	mainField := ""
 
 	for i := 0; i < t.NumField(); i++ {
-        field := t.Field(i)
-        if tagValue, ok := field.Tag.Lookup("db"); ok {
-            if tagValue == "main" {
+		field := t.Field(i)
+		if tagValue, ok := field.Tag.Lookup("db"); ok {
+			if tagValue == "main" {
 				if mainFieldFound {
 					fmt.Println("Error: Multiple main fields found")
 					return "", fmt.Errorf("multiple main fields found")
@@ -33,9 +33,9 @@ func CheckTag(s interface{}) (string, error) {
 					mainFieldFound = true
 					mainField = v.Field(i).Interface().(string)
 				}
-            }
-        }
-    }
+			}
+		}
+	}
 	if mainFieldFound {
 		return mainField, nil
 	} else {

@@ -87,7 +87,7 @@ func (driver *Driver) Write(collection string, v interface{}) error {
 
 	dir := filepath.Join(driver.dir, collection)
 	tempdir := filepath.Join(dir, data)
-	fnlPath := filepath.Join(dir, data + ".json")
+	fnlPath := filepath.Join(dir, data+".json")
 	tmpPath := fnlPath + ".tmp"
 
 	// Check if the file already exists
@@ -95,7 +95,7 @@ func (driver *Driver) Write(collection string, v interface{}) error {
 		fmt.Println("Record already exists!")
 		return fmt.Errorf("record already exists")
 	}
-	
+
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return err
 	}
@@ -115,7 +115,7 @@ func (driver *Driver) Write(collection string, v interface{}) error {
 
 // READ ANY RECORD FROM A GIVEN COLLECTION
 // Only From Primary Key
-func (driver *Driver) Read(collection string, data string,c *cache.Cache, wantCache bool) (string, error) {
+func (driver *Driver) Read(collection string, data string, c *cache.Cache, wantCache bool) (string, error) {
 	if collection == "" {
 		lumber.Error("Missing collection - No place to save record!")
 		return "", fmt.Errorf("missing collection - Unable To Read")
@@ -131,7 +131,7 @@ func (driver *Driver) Read(collection string, data string,c *cache.Cache, wantCa
 		return "", err
 	}
 
-	if(wantCache){
+	if wantCache {
 		if records, found := GetCache(c, record); found {
 			lumber.Info("Fetching data from cache")
 			return records.(string), nil
@@ -143,11 +143,11 @@ func (driver *Driver) Read(collection string, data string,c *cache.Cache, wantCa
 		return "", err
 	}
 
-	if(wantCache){
+	if wantCache {
 		lumber.Info("Saved data to Cache! ")
-		SetCache(c , record , string(b))
+		SetCache(c, record, string(b))
 	}
-	
+
 	return string(b), nil
 }
 
@@ -162,7 +162,7 @@ func (driver *Driver) ReadAll(collection string, c *cache.Cache, wantCache bool)
 	if _, err := os.Stat(dir); err != nil {
 		return nil, err
 	}
-	if(wantCache){
+	if wantCache {
 		if records, found := GetCache(c, dir); found {
 			lumber.Info("Fetching data from cache")
 			return records.([]string), nil
@@ -178,7 +178,7 @@ func (driver *Driver) ReadAll(collection string, c *cache.Cache, wantCache bool)
 		}
 		records = append(records, string(b))
 	}
-	if(wantCache){
+	if wantCache {
 		lumber.Info("Saved data to Cache")
 		SetCache(c, dir, records)
 	}
