@@ -124,10 +124,23 @@ func (driver *Driver) Read(collection string, data string,c *cache.Cache, wantCa
 		return "", err
 	}
 
+	if(wantCache){
+		if records, found := GetCache(c, record); found {
+			lumber.Info("Fetching data from cache")
+			return records.(string), nil
+		}
+	}
+
 	b, err := ioutil.ReadFile(record + ".json")
 	if err != nil {
 		return "", err
 	}
+
+	if(wantCache){
+		lumber.Info("Saved data to Cache! ")
+		SetCache(c , record , string(b))
+	}
+	
 	return string(b), nil
 }
 
@@ -143,7 +156,7 @@ func (driver *Driver) ReadAll(collection string, c *cache.Cache, wantCache bool)
 		return nil, err
 	}
 	if(wantCache){
-		if records, found := GetCache(c, collection); found {
+		if records, found := GetCache(c, dir); found {
 			lumber.Info("Fetching data from cache")
 			return records.([]string), nil
 		}
@@ -160,7 +173,7 @@ func (driver *Driver) ReadAll(collection string, c *cache.Cache, wantCache bool)
 	}
 	if(wantCache){
 		lumber.Info("Saved data to Cache")
-		SetCache(c, collection, records)
+		SetCache(c, dir, records)
 	}
 
 	return records, nil

@@ -82,7 +82,7 @@ func main(){
 		fmt.Println("Error", err)
 	}
 	fmt.Println(records)
-	
+
 	//Update Complete Record Example
 	db.UpdateRecord("users", "John4", User{
 		Name: "Shubham",
