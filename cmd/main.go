@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	//REMOVE Dot Import after thini=king of an appropriate name for the models package (Discouraged in GOlang)
+	//REMOVE Dot Import after thinking of an appropriate name for the models package (Discouraged in GOlang)
 	. "github.com/shubhexists/go-json-db/models" 
 )
 
@@ -26,10 +26,12 @@ type Address struct{
 	Pincode json.Number  `json:"pincode"`
 }
 
+
+
 func main(){
 	//All the collections would be in the /database directory
 	dir := "./database"
-	db, err := New(dir, nil)
+	db, cache, err := New(dir)
 	if err != nil{
 		fmt.Println(err)
 		return 
@@ -63,7 +65,7 @@ func main(){
 		}},
 	}
 
-	//Writing into the database Example
+	// //Writing into the database Example
 	for _,items := range employees {
 		db.Write("trials", User{
 			Name: items.Name,
@@ -73,16 +75,15 @@ func main(){
 			Address: items.Address,
 		})
 	}
-
-	//Read All Data in a Collection
-	records, err := db.ReadAll("trials");
-	if err != nil {
+	// //Read All Data in a Collection
+records, err := db.ReadAll("users", cache, true);
+if err != nil {
 		fmt.Println("Error", err)
 	}
-	fmt.Println(records)
+fmt.Println(records)
 
 	//Update Complete Record Example
-	db.UpdateRecord("users", "John4", User{
+db.UpdateRecord("users", "John4", User{
 		Name: "Shubham",
 		Age: "18",
 		Contact: "9585394030",
@@ -96,11 +97,13 @@ func main(){
 	})
 
 	//Read a specific record from file name
-	record2, err := db.Read("trials", "John10")
-	if err != nil{
+record2, err := db.Read("users", "John10", cache, true)
+
+if err != nil{
 		fmt.Println("Error", err)
-	}
-	fmt.Println(record2)
+}
+
+fmt.Println(record2)
 
 	//Delete any particular record from collection
 	err4 := db.Delete("users","John10")

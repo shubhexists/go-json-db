@@ -7,10 +7,12 @@ import (
 	//Maybe later on shift to a faster library for json encoding and decoding
 	"encoding/json"
 	"fmt"
-	"github.com/jcelliott/lumber"
-	"github.com/shubhexists/go-json-db/utils"
 	"os"
 	"path/filepath"
+
+	"github.com/jcelliott/lumber"
+	"github.com/patrickmn/go-cache"
+	"github.com/shubhexists/go-json-db/utils"
 )
 
 type (
@@ -21,7 +23,6 @@ type (
 		// this map will be used to store mutexes for each collection
 		mutexes map[string]*sync.Mutex
 		dir     string
-		log     Logger
 	}
 )
 
@@ -32,34 +33,26 @@ Current operations supported are -
 3) ReadAll
 4) Delete
 5) Delete Collection
-6) Update Record 
+6) Update Record
 */
 
 // CREATE A NEW DATABASE (COLLECTION)
-func New(dir string, options *Options) (*Driver, error) {
+func New(dir string) (*Driver, *cache.Cache, error) {
 	//This checks for any incorrect filename and corrects it.
 	dir = filepath.Clean(dir)
-	opts := Options{}
-	if options != nil {
-		opts = *options
-	}
-
-	if opts.Logger == nil {
-		opts.Logger = lumber.NewConsoleLogger((lumber.INFO))
-	}
 
 	driver := Driver{
 		dir:     dir,
 		mutexes: make(map[string]*sync.Mutex),
-		log:     opts.Logger,
 	}
 
 	if _, err := os.Stat(dir); err == nil {
-		opts.Logger.Debug("Using '%s' (database already exists)\n", dir)
-		return &driver, nil
+		lumber.Info("Database already exists")
+		return &driver, StartCache(5, 10), nil
 	}
-	opts.Logger.Debug("Creating the database at '%s' ...\n", dir)
-	return &driver, os.MkdirAll(
+
+	lumber.Info("Creating Database in directory %s", dir)
+	return &driver, StartCache(5, 10), os.MkdirAll(
 		dir,
 		0755)
 }
@@ -79,10 +72,11 @@ func (driver *Driver) ManageMutex(collection string) *sync.Mutex {
 // WRITE ANY RECORD TO A GIVEN COLLECTION
 func (driver *Driver) Write(collection string, v interface{}) error {
 	if collection == "" {
+		lumber.Error("Missing collection - No place to save record!")
 		return fmt.Errorf("missing collection - no place to save record")
 	}
 
-	data,err := utils.CheckTag(v)
+	data, err := utils.CheckTag(v)
 	if err != nil {
 		return err
 	}
@@ -121,12 +115,14 @@ func (driver *Driver) Write(collection string, v interface{}) error {
 
 // READ ANY RECORD FROM A GIVEN COLLECTION
 // Only From Primary Key
-func (driver *Driver) Read(collection string, data string) (string, error) {
+func (driver *Driver) Read(collection string, data string,c *cache.Cache, wantCache bool) (string, error) {
 	if collection == "" {
+		lumber.Error("Missing collection - No place to save record!")
 		return "", fmt.Errorf("missing collection - Unable To Read")
 	}
 
 	if data == "" {
+		lumber.Error("Missing data - No place to save record!")
 		return "", fmt.Errorf("missing data - Unable To Read")
 	}
 
@@ -135,24 +131,43 @@ func (driver *Driver) Read(collection string, data string) (string, error) {
 		return "", err
 	}
 
+	if(wantCache){
+		if records, found := GetCache(c, record); found {
+			lumber.Info("Fetching data from cache")
+			return records.(string), nil
+		}
+	}
+
 	b, err := ioutil.ReadFile(record + ".json")
 	if err != nil {
 		return "", err
 	}
+
+	if(wantCache){
+		lumber.Info("Saved data to Cache! ")
+		SetCache(c , record , string(b))
+	}
+	
 	return string(b), nil
 }
 
 // READ ALL RECORDS FROM A GIVEN COLLECTION
 // THIS WILL RETURN JSON ARRAY OF ALL THE RECORDS
-func (driver *Driver) ReadAll(collection string) ([]string, error) {
+func (driver *Driver) ReadAll(collection string, c *cache.Cache, wantCache bool) ([]string, error) {
 	if collection == "" {
+		lumber.Error("Missing collection - No place to save record!")
 		return nil, fmt.Errorf("missing collection - Unable to Read Record")
 	}
 	dir := filepath.Join(driver.dir, collection)
 	if _, err := os.Stat(dir); err != nil {
 		return nil, err
 	}
-
+	if(wantCache){
+		if records, found := GetCache(c, dir); found {
+			lumber.Info("Fetching data from cache")
+			return records.([]string), nil
+		}
+	}
 	files, _ := ioutil.ReadDir(dir)
 	var records []string
 
@@ -163,12 +178,23 @@ func (driver *Driver) ReadAll(collection string) ([]string, error) {
 		}
 		records = append(records, string(b))
 	}
+	if(wantCache){
+		lumber.Info("Saved data to Cache")
+		SetCache(c, dir, records)
+	}
+
 	return records, nil
 }
 
 // DELETE ANY RECORD FROM A GIVEN COLLECTION
 func (driver *Driver) Delete(collection string, data string) error {
+	if collection == "" {
+		lumber.Error("Missing collection - Unable to Delete!")
+		return fmt.Errorf("missing collection - Unable To Delete")
+	}
+
 	if data == "" {
+		lumber.Error("Cannot Delete - Record Not Found")
 		return fmt.Errorf("please enter a valid record")
 	}
 
@@ -180,8 +206,10 @@ func (driver *Driver) Delete(collection string, data string) error {
 	dir := filepath.Join(driver.dir, path)
 	switch fi, err := utils.Stat(dir); {
 	case fi == nil, err != nil:
+		lumber.Error("Cannot Delete - Record %v Not Found", path)
 		return fmt.Errorf("unable to find file or directory named %v", path)
 	case fi.Mode().IsDir():
+		lumber.Error("Cannot Delete - %v is a collection", path)
 		return fmt.Errorf("this seems like a collection, kindly enter a record to delete or use db.DeleteCollection")
 	case fi.Mode().IsRegular():
 		return os.RemoveAll(dir + ".json")
@@ -207,16 +235,21 @@ func (driver *Driver) DeleteCollection(collection string) error {
 
 // Update any record from a given collection
 // Currently we have to enter the entire User struct, UPDATE IT SO THAT WE CAN UPDATE ONLY THE REQUIRED FIELDS(Or Maybe make a new method for that?)
-// MUTEX LOCKS TO BE ADDED
-// Only Primary Key 
+// Only Primary Key
 func (driver *Driver) UpdateRecord(collection string, data string, v interface{}) error {
 	if collection == "" {
+		lumber.Error("Missing collection - No place to update record!")
 		return fmt.Errorf("missing collection - Unable To Update")
 	}
 
 	if data == "" {
+		lumber.Error("Missing Record - No place to update record!")
 		return fmt.Errorf("missing data - Unable To Update")
 	}
+
+	mutex := driver.ManageMutex(collection)
+	mutex.Lock()
+	defer mutex.Unlock()
 
 	record := filepath.Join(driver.dir, collection, data)
 	if _, err := utils.Stat(record); err != nil {
@@ -234,4 +267,3 @@ func (driver *Driver) UpdateRecord(collection string, data string, v interface{}
 	}
 	return nil
 }
-
