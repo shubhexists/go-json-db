@@ -26,10 +26,12 @@ type Address struct{
 	Pincode json.Number  `json:"pincode"`
 }
 
+
+
 func main(){
 	//All the collections would be in the /database directory
 	dir := "./database"
-	db, err := New(dir, nil)
+	db, err := New(dir)
 	if err != nil{
 		fmt.Println(err)
 		return 
@@ -103,10 +105,10 @@ func main(){
 	fmt.Println(record2)
 
 	//Delete any particular record from collection
-	err4 := db.Delete("users","John10")
-	if err4 != nil{
-		fmt.Println("Error", err4)
-	}
+	// err4 := db.Delete("users","John10")
+	// if err4 != nil{
+	// 	fmt.Println("Error", err4)
+	// }
 	
 	//Experimental
 	// //Example for Search

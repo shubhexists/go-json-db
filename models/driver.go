@@ -11,6 +11,7 @@ import (
 	"github.com/shubhexists/go-json-db/utils"
 	"os"
 	"path/filepath"
+	// "github.com/shubhexists/go-json-db/cache"
 )
 
 type (
@@ -21,7 +22,6 @@ type (
 		// this map will be used to store mutexes for each collection
 		mutexes map[string]*sync.Mutex
 		dir     string
-		log     Logger
 	}
 )
 
@@ -36,29 +36,21 @@ Current operations supported are -
 */
 
 // CREATE A NEW DATABASE (COLLECTION)
-func New(dir string, options *Options) (*Driver, error) {
+func New(dir string) (*Driver, error) {
 	//This checks for any incorrect filename and corrects it.
 	dir = filepath.Clean(dir)
-	opts := Options{}
-	if options != nil {
-		opts = *options
-	}
-
-	if opts.Logger == nil {
-		opts.Logger = lumber.NewConsoleLogger((lumber.INFO))
-	}
-
+	
 	driver := Driver{
 		dir:     dir,
 		mutexes: make(map[string]*sync.Mutex),
-		log:     opts.Logger,
 	}
-
+	
 	if _, err := os.Stat(dir); err == nil {
-		opts.Logger.Debug("Using '%s' (database already exists)\n", dir)
+		lumber.Info("Database already exists")
 		return &driver, nil
 	}
-	opts.Logger.Debug("Creating the database at '%s' ...\n", dir)
+
+	lumber.Info("Creating Database in directory %s", dir)
 	return &driver, os.MkdirAll(
 		dir,
 		0755)
@@ -79,6 +71,7 @@ func (driver *Driver) ManageMutex(collection string) *sync.Mutex {
 // WRITE ANY RECORD TO A GIVEN COLLECTION
 func (driver *Driver) Write(collection string, v interface{}) error {
 	if collection == "" {
+		lumber.Error("Missing collection - No place to save record!")
 		return fmt.Errorf("missing collection - no place to save record")
 	}
 
@@ -116,10 +109,12 @@ func (driver *Driver) Write(collection string, v interface{}) error {
 // Only From Primary Key
 func (driver *Driver) Read(collection string, data string) (string, error) {
 	if collection == "" {
+		lumber.Error("Missing collection - No place to save record!")
 		return "", fmt.Errorf("missing collection - Unable To Read")
 	}
 
 	if data == "" {
+		lumber.Error("Missing data - No place to save record!")
 		return "", fmt.Errorf("missing data - Unable To Read")
 	}
 
@@ -139,6 +134,7 @@ func (driver *Driver) Read(collection string, data string) (string, error) {
 // THIS WILL RETURN JSON ARRAY OF ALL THE RECORDS
 func (driver *Driver) ReadAll(collection string) ([]string, error) {
 	if collection == "" {
+		lumber.Error("Missing collection - No place to save record!")
 		return nil, fmt.Errorf("missing collection - Unable to Read Record")
 	}
 	dir := filepath.Join(driver.dir, collection)
@@ -161,7 +157,13 @@ func (driver *Driver) ReadAll(collection string) ([]string, error) {
 
 // DELETE ANY RECORD FROM A GIVEN COLLECTION
 func (driver *Driver) Delete(collection string, data string) error {
+	if collection == "" {
+		lumber.Error("Missing collection - Unable to Delete!")
+		return fmt.Errorf("missing collection - Unable To Delete")
+	}
+
 	if data == "" {
+		lumber.Error("Cannot Delete - Record Not Found")
 		return fmt.Errorf("please enter a valid record")
 	}
 
@@ -173,8 +175,10 @@ func (driver *Driver) Delete(collection string, data string) error {
 	dir := filepath.Join(driver.dir, path)
 	switch fi, err := utils.Stat(dir); {
 	case fi == nil, err != nil:
+		lumber.Error("Cannot Delete - Record %v Not Found", path)
 		return fmt.Errorf("unable to find file or directory named %v", path)
 	case fi.Mode().IsDir():
+		lumber.Error("Cannot Delete - %v is a collection", path)
 		return fmt.Errorf("this seems like a collection, kindly enter a record to delete or use db.DeleteCollection")
 	case fi.Mode().IsRegular():
 		return os.RemoveAll(dir + ".json")
@@ -203,10 +207,12 @@ func (driver *Driver) DeleteCollection(collection string) error {
 // Only Primary Key 
 func (driver *Driver) UpdateRecord(collection string, data string, v interface{}) error {
 	if collection == "" {
+		lumber.Error("Missing collection - No place to update record!")
 		return fmt.Errorf("missing collection - Unable To Update")
 	}
 
 	if data == "" {
+		lumber.Error("Missing Record - No place to update record!")
 		return fmt.Errorf("missing data - Unable To Update")
 	}
 	
