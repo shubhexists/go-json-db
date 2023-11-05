@@ -48,7 +48,7 @@ func New(dir string) (*Driver, *cache.Cache, error) {
 
 	if _, err := os.Stat(dir); err == nil {
 		lumber.Info("Database already exists")
-		return &driver, nil, nil
+		return &driver, StartCache(5, 10), nil
 	}
 
 	lumber.Info("Creating Database in directory %s", dir)
@@ -108,7 +108,7 @@ func (driver *Driver) Write(collection string, v interface{}) error {
 
 // READ ANY RECORD FROM A GIVEN COLLECTION
 // Only From Primary Key
-func (driver *Driver) Read(collection string, data string,c *cache.Cache) (string, error) {
+func (driver *Driver) Read(collection string, data string,c *cache.Cache, wantCache bool) (string, error) {
 	if collection == "" {
 		lumber.Error("Missing collection - No place to save record!")
 		return "", fmt.Errorf("missing collection - Unable To Read")
@@ -133,7 +133,7 @@ func (driver *Driver) Read(collection string, data string,c *cache.Cache) (strin
 
 // READ ALL RECORDS FROM A GIVEN COLLECTION
 // THIS WILL RETURN JSON ARRAY OF ALL THE RECORDS
-func (driver *Driver) ReadAll(collection string, c *cache.Cache) ([]string, error) {
+func (driver *Driver) ReadAll(collection string, c *cache.Cache, wantCache bool) ([]string, error) {
 	if collection == "" {
 		lumber.Error("Missing collection - No place to save record!")
 		return nil, fmt.Errorf("missing collection - Unable to Read Record")
@@ -142,7 +142,12 @@ func (driver *Driver) ReadAll(collection string, c *cache.Cache) ([]string, erro
 	if _, err := utils.Stat(dir); err != nil {
 		return nil, err
 	}
-
+	if(wantCache){
+		if records, found := GetCache(c, collection); found {
+			lumber.Info("Fetching data from cache")
+			return records.([]string), nil
+		}
+	}
 	files, _ := ioutil.ReadDir(dir)
 	var records []string
 
@@ -153,6 +158,11 @@ func (driver *Driver) ReadAll(collection string, c *cache.Cache) ([]string, erro
 		}
 		records = append(records, string(b))
 	}
+	if(wantCache){
+		lumber.Info("Saved data to Cache")
+		SetCache(c, collection, records)
+	}
+
 	return records, nil
 }
 

@@ -65,7 +65,7 @@ func main(){
 		}},
 	}
 
-	//Writing into the database Example
+	// //Writing into the database Example
 	for _,items := range employees {
 		db.Write("users", User{
 			Name: items.Name,
@@ -76,13 +76,13 @@ func main(){
 		})
 	}
 
-	//Read All Data in a Collection
-	records, err := db.ReadAll("users", cache);
+	// //Read All Data in a Collection
+	records, err := db.ReadAll("users", cache, true);
 	if err != nil {
 		fmt.Println("Error", err)
 	}
 	fmt.Println(records)
-
+	
 	//Update Complete Record Example
 	db.UpdateRecord("users", "John4", User{
 		Name: "Shubham",
@@ -98,7 +98,7 @@ func main(){
 	})
 
 	//Read a specific record from file name
-	record2, err := db.Read("users", "John10", cache)
+	record2, err := db.Read("users", "John10", cache, true)
 	if err != nil{
 		fmt.Println("Error", err)
 	}
