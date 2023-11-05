@@ -1,10 +1,17 @@
-package cache
+package models
 
 import (
 	"github.com/patrickmn/go-cache"
 	"time"
 )
+
+
 // We will be caching the data for model methods like ReadAll, Read, etc.
+
+/*Drivers ACCEPTING CACHE MEMORY(Doesn't include experimental drivers) - 
+1) ReadAll
+2) Read
+*/
 
 // This function would cache the data for a specified time provided by the user.
 //Start cache

@@ -31,7 +31,7 @@ type Address struct{
 func main(){
 	//All the collections would be in the /database directory
 	dir := "./database"
-	db, err := New(dir)
+	db, cache, err := New(dir)
 	if err != nil{
 		fmt.Println(err)
 		return 
@@ -77,7 +77,7 @@ func main(){
 	}
 
 	//Read All Data in a Collection
-	records, err := db.ReadAll("users");
+	records, err := db.ReadAll("users", cache);
 	if err != nil {
 		fmt.Println("Error", err)
 	}
@@ -98,17 +98,17 @@ func main(){
 	})
 
 	//Read a specific record from file name
-	record2, err := db.Read("users", "John10")
+	record2, err := db.Read("users", "John10", cache)
 	if err != nil{
 		fmt.Println("Error", err)
 	}
 	fmt.Println(record2)
 
 	//Delete any particular record from collection
-	// err4 := db.Delete("users","John10")
-	// if err4 != nil{
-	// 	fmt.Println("Error", err4)
-	// }
+	err4 := db.Delete("users","John10")
+	if err4 != nil{
+		fmt.Println("Error", err4)
+	}
 	
 	//Experimental
 	// //Example for Search

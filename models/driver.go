@@ -7,11 +7,12 @@ import (
 	//Maybe later on shift to a faster library for json encoding and decoding
 	"encoding/json"
 	"fmt"
-	"github.com/jcelliott/lumber"
-	"github.com/shubhexists/go-json-db/utils"
 	"os"
 	"path/filepath"
-	// "github.com/shubhexists/go-json-db/cache"
+
+	"github.com/jcelliott/lumber"
+	"github.com/patrickmn/go-cache"
+	"github.com/shubhexists/go-json-db/utils"
 )
 
 type (
@@ -32,26 +33,26 @@ Current operations supported are -
 3) ReadAll
 4) Delete
 5) Delete Collection
-6) Update Record 
+6) Update Record
 */
 
 // CREATE A NEW DATABASE (COLLECTION)
-func New(dir string) (*Driver, error) {
+func New(dir string) (*Driver, *cache.Cache, error) {
 	//This checks for any incorrect filename and corrects it.
 	dir = filepath.Clean(dir)
-	
+
 	driver := Driver{
 		dir:     dir,
 		mutexes: make(map[string]*sync.Mutex),
 	}
-	
+
 	if _, err := os.Stat(dir); err == nil {
 		lumber.Info("Database already exists")
-		return &driver, nil
+		return &driver, nil, nil
 	}
 
 	lumber.Info("Creating Database in directory %s", dir)
-	return &driver, os.MkdirAll(
+	return &driver, StartCache(5, 10), os.MkdirAll(
 		dir,
 		0755)
 }
@@ -75,7 +76,7 @@ func (driver *Driver) Write(collection string, v interface{}) error {
 		return fmt.Errorf("missing collection - no place to save record")
 	}
 
-	data,err := utils.CheckTag(v)
+	data, err := utils.CheckTag(v)
 	if err != nil {
 		return err
 	}
@@ -107,7 +108,7 @@ func (driver *Driver) Write(collection string, v interface{}) error {
 
 // READ ANY RECORD FROM A GIVEN COLLECTION
 // Only From Primary Key
-func (driver *Driver) Read(collection string, data string) (string, error) {
+func (driver *Driver) Read(collection string, data string,c *cache.Cache) (string, error) {
 	if collection == "" {
 		lumber.Error("Missing collection - No place to save record!")
 		return "", fmt.Errorf("missing collection - Unable To Read")
@@ -132,7 +133,7 @@ func (driver *Driver) Read(collection string, data string) (string, error) {
 
 // READ ALL RECORDS FROM A GIVEN COLLECTION
 // THIS WILL RETURN JSON ARRAY OF ALL THE RECORDS
-func (driver *Driver) ReadAll(collection string) ([]string, error) {
+func (driver *Driver) ReadAll(collection string, c *cache.Cache) ([]string, error) {
 	if collection == "" {
 		lumber.Error("Missing collection - No place to save record!")
 		return nil, fmt.Errorf("missing collection - Unable to Read Record")
@@ -203,8 +204,8 @@ func (driver *Driver) DeleteCollection(collection string) error {
 }
 
 // Update any record from a given collection
-// Currently we have to enter the entire User struct, UPDATE IT SO THAT WE CAN UPDATE ONLY THE REQUIRED FIELDS(Or Maybe make a new method for that?) 
-// Only Primary Key 
+// Currently we have to enter the entire User struct, UPDATE IT SO THAT WE CAN UPDATE ONLY THE REQUIRED FIELDS(Or Maybe make a new method for that?)
+// Only Primary Key
 func (driver *Driver) UpdateRecord(collection string, data string, v interface{}) error {
 	if collection == "" {
 		lumber.Error("Missing collection - No place to update record!")
@@ -215,7 +216,7 @@ func (driver *Driver) UpdateRecord(collection string, data string, v interface{}
 		lumber.Error("Missing Record - No place to update record!")
 		return fmt.Errorf("missing data - Unable To Update")
 	}
-	
+
 	mutex := driver.ManageMutex(collection)
 	mutex.Lock()
 	defer mutex.Unlock()
@@ -236,4 +237,3 @@ func (driver *Driver) UpdateRecord(collection string, data string, v interface{}
 	}
 	return nil
 }
-
