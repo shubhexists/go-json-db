@@ -111,7 +111,7 @@ func main() {
 
 	//Experimental
 	// //Example for Search
-	// err5 := db.Search("users","John20","address")
+	// err5 := db.Search("users","name","John4")
 	// if err5 != nil{
 	// 	fmt.Println("Error", err5)
 	// }
