@@ -3,7 +3,7 @@ package models
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	// "github.com/jcelliott/lumber"
 	"github.com/shubhexists/go-json-db/utils"
@@ -23,7 +23,7 @@ func (driver *Driver) Update(collection string, data string, v interface{}, newV
 		return err
 	}
 
-	b, err := ioutil.ReadFile(record + ".json")
+	b, err := os.ReadFile(record + ".json")
 	if err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func (driver *Driver) Update(collection string, data string, v interface{}, newV
 	}
 
 	b = append(b, byte('\n'))
-	if err := ioutil.WriteFile(record+".json", b, 0644); err != nil {
+	if err := os.WriteFile(record+".json", b, 0644); err != nil {
 		return err
 	}
 

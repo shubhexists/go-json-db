@@ -65,7 +65,7 @@ func main() {
 
 	// //Writing into the database Example
 	for _, items := range employees {
-		db.Write("trials", User{
+		db.Write("users", User{
 			Name:    items.Name,
 			Age:     items.Age,
 			Contact: items.Contact,

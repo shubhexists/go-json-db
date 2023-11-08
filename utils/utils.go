@@ -14,7 +14,7 @@ func Stat(path string) (fi os.FileInfo, err error) {
 	return
 }
 
-// Utility fucntion to check for tag "db" with value main in the struct and returning the struct member name
+// Utility function to check for tag "db" with value main in the struct and returning the struct member name
 func CheckTag(s interface{}) (string, error) {
 	v := reflect.ValueOf(s)
 	t := v.Type()
