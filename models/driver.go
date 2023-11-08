@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-
 	"github.com/jcelliott/lumber"
 	"github.com/patrickmn/go-cache"
 	"github.com/shubhexists/go-json-db/utils"
