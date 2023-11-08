@@ -1,0 +1,19 @@
+name: Linting of the code
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2 
+      - uses: actions/setup-go@v2
+        with:
+          stable: 'false'
+          go-version: '1.16'
+      - name: Lint with ESLint
+        run: |
+           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.26.0
+           golangci-lint run
