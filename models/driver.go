@@ -3,7 +3,6 @@ package models
 import (
 	"sync"
 	// io/util is deprecated but I found no alternative on ChatGPT :), To be updated soon with newer one
-	"io/ioutil"
 	//Maybe later on shift to a faster library for json encoding and decoding
 	"encoding/json"
 	"fmt"
@@ -86,12 +85,12 @@ func (driver *Driver) Write(collection string, v interface{}) error {
 	defer mutex.Unlock()
 
 	dir := filepath.Join(driver.dir, collection)
-	tempdir := filepath.Join(dir, data)
+	tempDir := filepath.Join(dir, data)
 	fnlPath := filepath.Join(dir, data+".json")
 	tmpPath := fnlPath + ".tmp"
 
 	// Check if the file already exists
-	if _, err := utils.Stat(tempdir); err == nil {
+	if _, err := utils.Stat(tempDir); err == nil {
 		fmt.Println("Record already exists!")
 		return fmt.Errorf("record already exists")
 	}
@@ -106,7 +105,7 @@ func (driver *Driver) Write(collection string, v interface{}) error {
 	}
 
 	b = append(b, byte('\n'))
-	if err := ioutil.WriteFile(tmpPath, b, 0644); err != nil {
+	if err := os.WriteFile(tmpPath, b, 0644); err != nil {
 		return err
 	}
 
@@ -138,7 +137,7 @@ func (driver *Driver) Read(collection string, data string, c *cache.Cache, wantC
 		}
 	}
 
-	b, err := ioutil.ReadFile(record + ".json")
+	b, err := os.ReadFile(record + ".json")
 	if err != nil {
 		return "", err
 	}
@@ -168,11 +167,11 @@ func (driver *Driver) ReadAll(collection string, c *cache.Cache, wantCache bool)
 			return records.([]string), nil
 		}
 	}
-	files, _ := ioutil.ReadDir(dir)
+	files, _ := os.ReadDir(dir)
 	var records []string
 
 	for _, file := range files {
-		b, err := ioutil.ReadFile(filepath.Join(dir, file.Name()))
+		b, err := os.ReadFile(filepath.Join(dir, file.Name()))
 		if err != nil {
 			return nil, err
 		}
@@ -262,7 +261,7 @@ func (driver *Driver) UpdateRecord(collection string, data string, v interface{}
 	}
 
 	b = append(b, byte('\n'))
-	if err := ioutil.WriteFile(record+".json", b, 0644); err != nil {
+	if err := os.WriteFile(record+".json", b, 0644); err != nil {
 		return err
 	}
 	return nil
