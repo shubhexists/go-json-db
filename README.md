@@ -14,9 +14,35 @@ It goes down a No-Sql path ,quite similar to what MongoDB (Atlas) does. This pro
 
 The main idea of this project is to bring the complex database processes like caching and mutexes into the most understandable language of Developers i.e. JSON : ).
 
+# Installation 
+
+Currently, to install, there are two dependencies that are also to be install with the project.
+
+This package can be installed by -
+
+`go get github.com/shubhexists/go-json-db`
+
+Cache is implemented by - 
+
+`go get github.com/patrickmn/go-cache`
+
+Logging is implemented by - 
+
+`github.com/jcelliott/lumber`
+# Usage 
+1) Import the package by - 
+
+`github.com/shubhexists/go-json-db/models`
+
+2) Create a new db instance in your desired directory -
+
+` db, cache, err := models.New("./database")`
+
+3) Perform Operations as desired! For reference you can take the help of `examples/main.go` of this repository
+
 # Status 
-This project is still in infancy. 
+This project was built by me as a part of learning Golang. This project is heavily insipred by the architecture that MongoDB takes to provide a database. 
 
-Work is going on and we are currently working on providing sufficient API's so that virtually all database operations can be performed in the JSON Database.
+This project still has lot of operations left which I would complete as soon as I get time , However as it's current stage, it is ready for usage in small projects atleast. : )
 
-Would try implementing advanced database features once we feel confident about the functional working of the database.
+Enjoy!
