@@ -3,8 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	//REMOVE Dot Import after thinking of an appropriate name for the models package (Discouraged in GOlang)
-	. "github.com/shubhexists/go-json-db/gojsondb"
+	"github.com/shubhexists/go-json-db/gojsondb"
 )
 
 // EVERY THING HERE SHOULD BE IN MODELS FOR THE USER TO CREATE THESE DYNAMICALLY, THESE ARE JUST THE EXAMPLES.
@@ -29,7 +28,7 @@ type Address struct {
 func main() {
 	//All the collections would be in the /database directory
 	dir := "./database"
-	db, cache, err := New(dir)
+	db, cache, err := gojsondb.New(dir)
 	if err != nil {
 		fmt.Println(err)
 		return
