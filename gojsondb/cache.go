@@ -1,4 +1,4 @@
-package models
+package gojsondb
 
 import (
 	"github.com/patrickmn/go-cache"
