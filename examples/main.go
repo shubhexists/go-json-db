@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	//REMOVE Dot Import after thinking of an appropriate name for the models package (Discouraged in GOlang)
-	. "github.com/shubhexists/go-json-db/models"
+	. "github.com/shubhexists/go-json-db/gojsondb"
 )
 
 // EVERY THING HERE SHOULD BE IN MODELS FOR THE USER TO CREATE THESE DYNAMICALLY, THESE ARE JUST THE EXAMPLES.
