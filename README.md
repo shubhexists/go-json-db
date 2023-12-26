@@ -20,23 +20,33 @@ Currently, to install, there are two dependencies that are also to be install wi
 
 This package can be installed by -
 
-`go get github.com/shubhexists/go-json-db`
+```
+go get github.com/shubhexists/go-json-db
+```
 
 Cache is implemented by - 
 
-`go get github.com/patrickmn/go-cache`
+```
+go get github.com/patrickmn/go-cache
+```
 
 Logging is implemented by - 
 
-`github.com/jcelliott/lumber`
+```
+github.com/jcelliott/lumber
+```
 # Usage 
 1) Import the package by - 
 
-`github.com/shubhexists/go-json-db/models`
+```
+github.com/shubhexists/go-json-db/models
+```
 
 2) Create a new db instance in your desired directory -
 
-` db, cache, err := models.New("./database")`
+```
+ db, cache, err := models.New("./database")
+```
 
 3) Perform Operations as desired! For reference you can take the help of `examples/main.go` of this repository
 
